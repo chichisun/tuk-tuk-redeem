@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tuk Tuk Thai Grill — Your Offer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arimo, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      transition: background-color 0.5s ease;
+    }
+
+    /* States */
+    body.loading { background-color: #f5f5f5; }
+    body.unredeemed { background-color: #FFF8F0; }
+    body.redeemed { background-color: #22C55E; }
+    body.expired { background-color: #f0f0f0; }
+    body.unsubscribed { background-color: #f0f0f0; }
+    body.error { background-color: #f0f0f0; }
+
+    .card {
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .brand {
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #F2CC14;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    body.redeemed .brand { color: #ffffff; }
+
+    .brand-sub {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 30px;
+    }
+    body.redeemed .brand-sub { color: rgba(255,255,255,0.8); }
+
+    /* Offer box */
+    .offer-box {
+      background: linear-gradient(135deg, #F2CC14 0%, #D4B012 100%);
+      border-radius: 16px;
+      padding: 40px 30px;
+      margin: 20px 0;
+      box-shadow: 0 8px 30px rgba(242, 204, 20, 0.3);
+    }
+    body.redeemed .offer-box {
+      background: rgba(255,255,255,0.2);
+      box-shadow: none;
+    }
+    body.expired .offer-box {
+      background: linear-gradient(135deg, #999 0%, #888 100%);
+      box-shadow: none;
+    }
+
+    .offer-label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .offer-amount {
+      font-size: 56px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .offer-text {
+      font-size: 16px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .customer-name {
+      font-size: 14px;
+      color: #666;
+      margin: 16px 0 4px 0;
+    }
+    body.redeemed .customer-name { color: rgba(255,255,255,0.8); }
+
+    .dine-in-note {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 20px;
+    }
+    body.redeemed .dine-in-note { color: rgba(255,255,255,0.7); }
+
+    .instructions {
+      font-size: 15px;
+      color: #555;
+      line-height: 1.5;
+      margin: 20px 0;
+    }
+
+    /* Redeem button */
+    .redeem-btn {
+      display: inline-block;
+      background-color: #F2CC14;
+      color: #333333;
+      border: none;
+      padding: 18px 50px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 20px 0;
+      transition: background-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .redeem-btn:hover { background-color: #D4B012; }
+    .redeem-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* State badges */
+    .badge {
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 20px 0 10px;
+    }
+    .badge-redeemed { color: #ffffff; }
+    .badge-expired { color: #666; }
+
+    .state-message {
+      font-size: 15px;
+      line-height: 1.5;
+      margin: 10px 0 20px;
+    }
+    body.redeemed .state-message { color: rgba(255,255,255,0.9); }
+    body.expired .state-message, body.unsubscribed .state-message { color: #666; }
+
+    .redeemed-instructions {
+      font-size: 16px;
+      color: #ffffff;
+      font-weight: 500;
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+    }
+
+    .unsub-heading {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+      margin: 20px 0 10px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 11px;
+      color: #bbb;
+    }
+    body.redeemed .footer { color: rgba(255,255,255,0.6); }
+
+    /* Loading spinner */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #ddd;
+      border-top-color: #F2CC14;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 40px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hide sections by default */
+    .section { display: none; }
+  </style>
+</head>
+<body class="loading">
+  <div class="card">
+    <div class="brand">Tuk Tuk Thai Grill</div>
+    <div class="brand-sub">218 Union Blvd, Lakewood</div>
+
+    <!-- Loading -->
+    <div id="sec-loading" class="section" style="display:block;">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Offer box (shared across states) -->
+    <div id="sec-offer" class="section">
+      <div class="offer-box">
+        <div class="offer-label" id="offer-label">Your Special Offer</div>
+        <div class="offer-amount" id="offer-amount"></div>
+        <div class="offer-text" id="offer-text"></div>
+      </div>
+      <div class="customer-name" id="customer-name"></div>
+      <div class="dine-in-note">Valid for dine-in only</div>
+    </div>
+
+    <!-- Unredeemed — Step 1: Show offer -->
+    <div id="sec-unredeemed" class="section">
+      <p class="instructions">
+        Show this screen to your server when you're ready to order.
+      </p>
+      <button class="redeem-btn" id="redeem-btn" onclick="showConfirm()">
+        REDEEM IN STORE
+      </button>
+    </div>
+
+    <!-- Unredeemed — Step 2: Confirm -->
+    <div id="sec-confirm" class="section">
+      <p class="instructions" style="font-size: 18px; font-weight: 600; color: #333;">
+        Are you at Tuk Tuk right now?
+      </p>
+      <p class="instructions" style="margin-top: 4px; font-size: 13px; color: #999;">
+        This offer can only be redeemed once.
+      </p>
+      <button class="redeem-btn" id="confirm-btn" onclick="redeemOffer()" style="background-color: #22C55E; color: #fff;">
+        YES, USE MY OFFER
+      </button>
+      <br>
+      <button class="redeem-btn" id="cancel-btn" onclick="cancelConfirm()" style="background-color: transparent; color: #999; border: 1px solid #ddd; font-size: 14px; padding: 14px 40px;">
+        NOT YET
+      </button>
+    </div>
+
+    <!-- Redeemed -->
+    <div id="sec-redeemed" class="section">
+      <div class="badge badge-redeemed">VERIFIED</div>
+      <div class="state-message" id="redeem-time"></div>
+      <div class="redeemed-instructions">Show this screen to your server</div>
+    </div>
+
+    <!-- Expired -->
+    <div id="sec-expired" class="section">
+      <div class="badge badge-expired">EXPIRED</div>
+      <div class="state-message">
+        This offer has expired, but we'd still love to see you!<br>
+        Visit us at 218 Union Blvd, Lakewood
+      </div>
+    </div>
+
+    <!-- Unsubscribed -->
+    <div id="sec-unsubscribed" class="section">
+      <div class="unsub-heading">You've been unsubscribed</div>
+      <div class="state-message">
+        You won't receive any more win-back emails from us.<br>
+        Visit us anytime at 218 Union Blvd, Lakewood
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="sec-error" class="section">
+      <div class="badge badge-expired">INVALID LINK</div>
+      <div class="state-message" id="error-message">
+        This redemption code was not found.
+      </div>
+    </div>
+
+    <div class="footer">(303) 716-9999 | tuktukrocks.com</div>
+  </div>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // ── Config ──
+    var SUPABASE_URL = 'https://detbzhioglgwenfrtzly.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRldGJ6aGlvZ2xnd2VuZnJ0emx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTU5MzQsImV4cCI6MjA4NTYzMTkzNH0.yRHk0mGfQhreZS4V0RQIP0_EIseK1nZjdkxh3J7kUoY';
+
+    var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ── Parse URL params ──
+    var params = new URLSearchParams(window.location.search);
+    var code = params.get('code');
+    var isUnsubscribe = params.get('unsubscribe') === '1';
+
+    // ── State ──
+    var codeData = null;
+
+    // ── Show a section ──
+    function showState(state) {
+      document.body.className = state;
+      document.querySelectorAll('.section').forEach(function(el) { el.style.display = 'none'; });
+
+      if (state === 'loading') {
+        document.getElementById('sec-loading').style.display = 'block';
+        return;
+      }
+
+      // Show offer box for all states except error and loading
+      if (state !== 'error') {
+        document.getElementById('sec-offer').style.display = 'block';
+      }
+
+      var sectionId = 'sec-' + state;
+      var section = document.getElementById(sectionId);
+      if (section) section.style.display = 'block';
+    }
+
+    // ── Load the code ──
+    async function loadCode() {
+      if (!code) {
+        showState('error');
+        return;
+      }
+
+      var result = await supabase
+        .from('winback_codes')
+        .select('*')
+        .eq('code', code)
+        .single();
+
+      if (result.error || !result.data) {
+        showState('error');
+        return;
+      }
+
+      codeData = result.data;
+
+      // Populate offer details
+      document.getElementById('offer-amount').textContent = codeData.offer_amount;
+      document.getElementById('offer-text').textContent = codeData.offer_text;
+      document.getElementById('customer-name').textContent = 'Offer for: ' + codeData.customer_name;
+
+      // Handle unsubscribe
+      if (isUnsubscribe) {
+        await supabase
+          .from('winback_codes')
+          .update({ unsubscribed: true, unsubscribed_at: new Date().toISOString() })
+          .eq('code', code);
+        showState('unsubscribed');
+        return;
+      }
+
+      // Check states
+      if (codeData.unsubscribed) {
+        showState('unsubscribed');
+      } else if (codeData.redeemed) {
+        document.getElementById('offer-label').textContent = 'Redeemed';
+        document.getElementById('redeem-time').textContent =
+          new Date(codeData.redeemed_at).toLocaleString();
+        showState('redeemed');
+      } else if (new Date(codeData.expiry_date + 'T23:59:59') < new Date()) {
+        showState('expired');
+      } else {
+        showState('unredeemed');
+      }
+    }
+
+    // ── Confirm step ──
+    function showConfirm() {
+      document.getElementById('sec-unredeemed').style.display = 'none';
+      document.getElementById('sec-confirm').style.display = 'block';
+    }
+
+    function cancelConfirm() {
+      document.getElementById('sec-confirm').style.display = 'none';
+      document.getElementById('sec-unredeemed').style.display = 'block';
+    }
+
+    // ── Redeem ──
+    async function redeemOffer() {
+      if (!codeData || codeData.redeemed) return;
+
+      var btn = document.getElementById('redeem-btn');
+      btn.disabled = true;
+      btn.textContent = 'REDEEMING...';
+
+      var now = new Date().toISOString();
+
+      var result = await supabase
+        .from('winback_codes')
+        .update({ redeemed: true, redeemed_at: now })
+        .eq('code', code)
+        .eq('redeemed', false)
+        .select();
+
+      if (result.error) {
+        btn.textContent = 'ERROR — TRY AGAIN';
+        btn.disabled = false;
+        return;
+      }
+
+      codeData.redeemed = true;
+      codeData.redeemed_at = now;
+      document.getElementById('offer-label').textContent = 'Redeemed';
+      document.getElementById('redeem-time').textContent = new Date(now).toLocaleString();
+      showState('redeemed');
+    }
+
+    // ── Init ──
+    loadCode();
+  </script>
+</body>
+</html>
