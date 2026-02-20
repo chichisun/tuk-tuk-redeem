@@ -332,6 +332,13 @@
 
       codeData = result.data;
 
+      // Track click — visiting this page means they clicked a link in the email
+      if (!codeData.clicked_at) {
+        var trackUpdates = { clicked_at: new Date().toISOString() };
+        if (!codeData.opened_at) trackUpdates.opened_at = new Date().toISOString();
+        supabase.from('winback_codes').update(trackUpdates).eq('code', code).is('clicked_at', null);
+      }
+
       // Populate offer details
       document.getElementById('offer-amount').textContent = codeData.offer_amount;
       document.getElementById('offer-text').textContent = codeData.offer_text;
